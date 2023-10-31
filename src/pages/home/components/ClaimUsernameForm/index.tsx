@@ -4,6 +4,7 @@ import { ArrowRight } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/router'
 
 // Para instalar -> npm i react-hook-form @hookform/resolvers zod
 
@@ -23,13 +24,18 @@ export function ClaimUsernameForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ClaimUsernameFormData>({
     resolver: zodResolver(claimUsernameFormSchema), // Inserção para validação do schema
   }) // importação do react useForm
 
+  const router = useRouter()
+
   async function handleClaimUsername(data: ClaimUsernameFormData) {
-    console.log(data)
+    const { username } = data
+
+    await router.push(`/register?username=${username}`) // Direcionando para a página /register,
+    // Importante lembrar que o await serve porque pode demorar a request e o isSubmitting desabilita o botão enquanto isso
   }
 
   return (
@@ -39,15 +45,16 @@ export function ClaimUsernameForm() {
           size="sm"
           prefix="ignite.com/"
           placeholder="seu-usuario"
-          {...register('username')} // Para que de fato retorne o campo
+          {...register('username')} // Campo criado no schema
           crossOrigin
         />
-        <Button size="sm" type="submit">
+        <Button size="sm" type="submit" disabled={isSubmitting}>
           Reservar
           <ArrowRight />
         </Button>
       </Form>
 
+      {/* FormAnnotation -> Componente para mostar o erro na tela */}
       <FormAnnotation>
         <Text size="sm">
           {errors.username
@@ -55,6 +62,7 @@ export function ClaimUsernameForm() {
             : 'Digite o nome do usuário desejado.'}
         </Text>
       </FormAnnotation>
+      {/* ****************************************************** */}
     </>
   )
 }
